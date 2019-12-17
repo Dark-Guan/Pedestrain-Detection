@@ -182,10 +182,10 @@ void SliceImage(myMat *img, int p)
 			p4_img[j*wn + i] = p_image[j*w + 3 * wn + i];
 		}
 	}
-	SaveGrayBitmap8("E:\\Slice1.bmp", p1_img, wn, h);
-	SaveGrayBitmap8("E:\\Slice2.bmp", p2_img, wn, h);
-	SaveGrayBitmap8("E:\\Slice3.bmp", p3_img, wn, h);
-	SaveGrayBitmap8("E:\\Slice4.bmp", p4_img, wn, h);
+	SaveGrayBitmap8("Slice1.bmp", p1_img, wn, h);
+	SaveGrayBitmap8("Slice2.bmp", p2_img, wn, h);
+	SaveGrayBitmap8("Slice3.bmp", p3_img, wn, h);
+	SaveGrayBitmap8("Slice4.bmp", p4_img, wn, h);
 }
 
 
@@ -201,7 +201,7 @@ int main(int argc, char** argv)
 	size_ w, p;
 	char str[128];
 
-	char filename[128] = "F:\\RANJIEWEN\\CLQ_C_code\\HOG_SVM_master\\000001.bmp"; //001IRB.bmp  //000001.bmp---24 // ---8  test_8.bmp
+	char filename[128] = "000001.bmp"; //001IRB.bmp  //000001.bmp---24 // ---8  test_8.bmp
 	strcpy(str, filename);	
 	//²âÊÔbmp
 	uchar *image_data = NULL;
@@ -210,7 +210,7 @@ int main(int argc, char** argv)
 	uchar *reverse_image = networkData;
 	ImgInverse(img, reverse_image);  //·­×ªÍ¼Ïñ
 	img->data = reverse_image;
-	SaveGrayBitmap24("E:\\hog_bmp.bmp", img->data, img->width, img->height);
+	SaveGrayBitmap24("hog_bmp.bmp", img->data, img->width, img->height);
 
 
 	////²âÊÔpgm
@@ -250,13 +250,17 @@ int main(int argc, char** argv)
 		printf("%s : x=%d y=%d w=%d h=%d\n", str, 0, 0, 0, 0);
 	}
 
-	SaveGrayBitmap24("E:\\Detect_result.bmp", img->data, img->width, img->height);
+	SaveGrayBitmap24("Detect_result.bmp", img->data, img->width, img->height);
 
+	printf("before free\n");
 	sbfree(found);
+	printf("after sbfree found\n");
 	sbfree(found_filtered);
-	free(img->data);
-	free(img);
-
+	printf("after sbfree found_filtered\n");
+	// free(img->data);
+	printf("after free img->data\n");
+	// free(img);
+	printf("after free img\n");
 	return 0;
 }
 

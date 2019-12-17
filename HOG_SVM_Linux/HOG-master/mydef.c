@@ -116,12 +116,12 @@ double gcd(double a, double b)
 	return a;
 };
 
-__inline size_t myalignSize(size_t sz, int n)
+static  __inline size_t myalignSize(size_t sz, int n)
 {
 	return (sz + n-1) & -n;
 };
 
-__inline int clip(int x, int a, int b)
+static  __inline int clip(int x, int a, int b)
 {
     return x >= a ? (x < b ? x : b-1) : a;
 };

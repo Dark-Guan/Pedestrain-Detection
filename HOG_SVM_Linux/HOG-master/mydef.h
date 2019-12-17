@@ -194,9 +194,9 @@ void detect(hog_* obj, myMat* img, point_** hits, double** weights, double hitTh
 
 double gcd(double a, double b);
 
-__inline size_t myalignSize(size_t sz, int n);
+static  __inline size_t myalignSize(size_t sz, int n);
 
-__inline int clip(int x, int a, int b);
+static  __inline int clip(int x, int a, int b);
 
 void cacheinit(hog_* descriptor, HCache_* cache, myMat* img, size_ paddingTL, size_ paddingBR, bool useCache, size_ cacheStride);
 

@@ -4,32 +4,42 @@
 #include "string.h"
 #include "malloc.h"
 
-//typedef unsigned short WORD;
-//typedef unsigned int DWORD;
-//typedef int LONG;
-//typedef struct tagBITMAPFILEHEADER {
-//	WORD    bfType;
-//	DWORD   bfSize;
-//	WORD    bfReserved1;
-//	WORD    bfReserved2;
-//	DWORD   bfOffBits;
-//} BITMAPFILEHEADER;
-//typedef struct tagBITMAPINFOHEADER{
-//	DWORD      biSize;
-//	LONG        biWidth;
-//	LONG        biHeight;
-//	WORD       biPlanes;
-//	WORD       biBitCount;
-//	DWORD      biCompression;
-//	DWORD      biSizeImage;
-//	LONG        biXPelsPerMeter;
-//	LONG        biYPelsPerMeter;
-//	DWORD      biClrUsed;
-//	DWORD      biClrImportant;
-//} BITMAPINFOHEADER;
+typedef unsigned short WORD;
+typedef unsigned int DWORD;
+typedef unsigned char BYTE;
+typedef int LONG;
+# pragma pack (push, 1)
+typedef struct tagRGBTRIPLE
+{ BYTE				rgbtBlue;
+  BYTE				rgbtGreen;
+  BYTE				rgbtRed;
+} RGBTRIPLE, *LPRGBTRIPLE;
+
+# pragma pack (2)
+typedef struct tagBITMAPFILEHEADER {
+	WORD    bfType;
+	DWORD   bfSize;
+	WORD    bfReserved1;
+	WORD    bfReserved2;
+	DWORD   bfOffBits;
+} BITMAPFILEHEADER;
+# pragma pack (pop)
+typedef struct tagBITMAPINFOHEADER{
+	DWORD      biSize;
+	LONG        biWidth;
+	LONG        biHeight;
+	WORD       biPlanes;
+	WORD       biBitCount;
+	DWORD      biCompression;
+	DWORD      biSizeImage;
+	LONG        biXPelsPerMeter;
+	LONG        biYPelsPerMeter;
+	DWORD      biClrUsed;
+	DWORD      biClrImportant;
+} BITMAPINFOHEADER;
 
 
-#include "windows.h"  //BITMAPFILEHEADER包含文件
+// #include "windows.h"  //BITMAPFILEHEADER包含文件
 
 myMat *loadBitmapFromFile24(const char *filePath, U8 **bits)     //24
 {
@@ -56,7 +66,7 @@ myMat *loadBitmapFromFile24(const char *filePath, U8 **bits)     //24
 	}
 	if (bih.biBitCount != 24) {
 		fclose(fp);
-		printf("unsupported bitmap format.\n");
+		printf("unsupported bitmap format. get %d bit\n",bih.biBitCount);
 		exit(-1);
 	}
 	int imageSize = (bih.biWidth*3 + 3) / 4 * 4 * bih.biHeight;
