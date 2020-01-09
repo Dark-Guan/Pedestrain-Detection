@@ -102,12 +102,26 @@ void ImgInverse(myMat * img, uchar * reverse_image)
 }
 
 void DrawImageEdgeCorner8(myMat *img,int x,int y,int w,int h)
-{
+{	
+
+	if(x < 0){
+		x = 0;
+	}
+	if(y < 0){
+		y = 0;
+	}
+	if(w > img->width){
+		w = img->width;
+	}
+	if(h > img->height){
+		h = img->height;
+	}
+
 	int i, j;
 
 	U8 *p_image = img->data;
-	//锟斤拷锟斤拷4锟斤拷锟斤拷缘锟竭ｏ拷锟斤拷为锟斤拷色
-	//锟斤拷锟铰憋拷缘锟斤拷
+	//画出4条边缘线，标为红色
+	//上下边缘线
 	for (i = 0; i < w;i++)
 	{
 		p_image[y*img->width + x + i] = 255;
@@ -125,12 +139,26 @@ void DrawImageEdgeCorner8(myMat *img,int x,int y,int w,int h)
 }
 
 void DrawImageEdgeCorner24(myMat *img, int x, int y, int w, int h)
-{
+{	
+
+	if(x < 0){
+		x = 0;
+	}
+	if(y < 0){
+		y = 0;
+	}
+	if(w > img->width){
+		w = img->width;
+	}
+	if(h > img->height){
+		h = img->height;
+	}
+
 	int i, j;
 
 	U8 *p_image = img->data;
-	//锟斤拷锟斤拷4锟斤拷锟斤拷缘锟竭ｏ拷锟斤拷为锟斤拷色
-	//锟斤拷锟铰猴拷锟斤拷
+	//画出4条边缘线，标为红色
+	//上下横线
 	for (i = 0; i < w*3; i++)
 	{
 		p_image[y*img->step + x*3 + i] = 255;
@@ -141,7 +169,7 @@ void DrawImageEdgeCorner24(myMat *img, int x, int y, int w, int h)
 		p_image[(y + h)*img->step + x * 3 + i + 1] = 255;
 		p_image[(y + h)*img->step + x * 3 + i + 2] = 255;
 	}
-	for (j = 0; j < h; j++)  //锟斤拷锟揭猴拷锟斤拷
+	for (j = 0; j < h; j++)  //左右横线
 	{
 		p_image[(y + j)*img->step + x * 3] = 255;
 		p_image[(y + j)*img->step + x * 3 + 1] = 255;
@@ -150,7 +178,54 @@ void DrawImageEdgeCorner24(myMat *img, int x, int y, int w, int h)
 		p_image[(y + j)*img->step + x * 3 + w*3] = 255;
 		p_image[(y + j)*img->step + x * 3 + w*3 + 1] = 255;
 		p_image[(y + j)*img->step + x * 3 + w*3 + 2] = 255;
+	} 
+
+	//SaveGrayBitmap_("E:\\Detect_result.bmp", p_image, img->width, img->height); 
+
+	//free(p_image);
+}
+
+void DrawImageEdgeCorner32(myMat *img, int x, int y, int w, int h)
+{	
+
+	if(x < 0){
+		x = 0;
 	}
+	if(y < 0){
+		y = 0;
+	}
+	if(w > img->width){
+		w = img->width;
+	}
+	if(h > img->height){
+		h = img->height;
+	}
+
+	int i, j;
+
+	U8 *p_image = img->data;
+	//画出4条边缘线，标为红色
+	//上下横线
+	for (i = 0; i < w*3; i++)
+	{
+		p_image[y*img->step + x*4 + i] = 255;
+		p_image[y*img->step + x*4 + i+1] = 255;
+		p_image[y*img->step + x*4 + i+2] = 255;
+
+		p_image[(y + h)*img->step + x * 4 + i] = 255;
+		p_image[(y + h)*img->step + x * 4 + i + 1] = 255;
+		p_image[(y + h)*img->step + x * 4 + i + 2] = 255;
+	}
+	for (j = 0; j < h; j++)  //左右横线
+	{
+		p_image[(y + j)*img->step + x * 4] = 255;
+		p_image[(y + j)*img->step + x * 4 + 1] = 255;
+		p_image[(y + j)*img->step + x * 4 + 2] = 255;
+
+		p_image[(y + j)*img->step + x * 4 + w*4] = 255;
+		p_image[(y + j)*img->step + x * 4 + w*4 + 1] = 255;
+		p_image[(y + j)*img->step + x * 4 + w*4 + 2] = 255;
+	} 
 
 	//SaveGrayBitmap_("E:\\Detect_result.bmp", p_image, img->width, img->height); 
 
@@ -165,16 +240,17 @@ void SliceImage(myMat *img, int p)
 	int w = img->width;
 	int h = img->height;
 
-	int wn = w / p;   //锟斤拷锟斤拷锟饺斤拷图片锟街筹拷4锟斤拷锟斤拷
+	int wn = w / p;   //这里先将图片分成4部分
 	
 	int offset = 800 * 400;
 	U8 *p1_img = p_data;
 	U8 *p2_img = p_data + offset;
 	U8 *p3_img = p_data + 2*offset;
 	U8 *p4_img = p_data + 3*offset;
-	for (int j = 0; j < h; j++)
+	int i,j;
+	for (j = 0; j < h; j++)
 	{
-		for (int i = 0; i < wn; i++)
+		for (i = 0; i < wn; i++)
 		{
 			p1_img[j*wn + i] = p_image[j*w + i];
 			p2_img[j*wn + i] = p_image[j*w + wn + i];
@@ -182,43 +258,97 @@ void SliceImage(myMat *img, int p)
 			p4_img[j*wn + i] = p_image[j*w + 3 * wn + i];
 		}
 	}
-	SaveGrayBitmap8("E:\\Slice1.bmp", p1_img, wn, h);
-	SaveGrayBitmap8("E:\\Slice2.bmp", p2_img, wn, h);
-	SaveGrayBitmap8("E:\\Slice3.bmp", p3_img, wn, h);
-	SaveGrayBitmap8("E:\\Slice4.bmp", p4_img, wn, h);
+	SaveGrayBitmap8("Slice1.bmp", p1_img, wn, h);
+	SaveGrayBitmap8("Slice2.bmp", p2_img, wn, h);
+	SaveGrayBitmap8("Slice3.bmp", p3_img, wn, h);
+	SaveGrayBitmap8("Slice4.bmp", p4_img, wn, h);
 }
 
-
-//锟斤拷锟侥硷拷锟斤拷锟斤拷
+//单文件处理
 int main(int argc, char** argv)
 {	
-	printf("peopledetect is running....\n");
-	myMat *img;
+	if(argc < 2){
+		printf("the input value should be moren then 2\n"
+		"Usage peopleDetect bmp file\n");
+		return -1;
+	}
 
+	myMat *img;
 	int i;
 	clock_t t;
 	hog_ hog;
 	rect_ *found = NULL, *found_filtered = NULL;
 	size_ w, p;
 	char str[128];
+	t = clock();
+	// char filename[128] = "crop_000001a.bmp"; //001IRB.bmp  //000001.bmp---24 // ---8  test_8.bmp
+	char filename[128]; //001IRB.bmp  //000001.bmp---24 // ---8  test_8.bmp
+	char filename_buf[128];
+	const char *pfile;
+	int bitCount = 0;
 
-	char filename[128] = "G:\\Share_code\\10-test\\9-pedestrain-detection\\Pedestrain-Detection\\HOG_SVM_master\\000001.bmp"; //001IRB.bmp  //000001.bmp---24 // ---8  test_8.bmp
+	strcpy(filename, argv[1]);
 	strcpy(str, filename);	
-	//锟斤拷锟斤拷bmp
+	printf("try to load file : %s:\n", filename);
+
+	pfile = strrchr(filename, '.');
+	if(NULL != pfile){
+		if(strcmp(pfile,".bmp")==0){
+			printf("bmp file get\n");
+		}else{
+			printf("%s file is not supported, exit\n",pfile);
+			return -1;
+		}
+	}else{
+		printf("%s has no filename extension, exit\n",filename);
+		return -1;
+	}
+
+	//get bitcount of bmp file
+	bitCount = GetBitCountOfBmpFile(filename);
+
+	printf("%s bitCount is %d\n", filename, bitCount);
+	if(bitCount != 8 && bitCount != 24 && bitCount != 32){
+		printf("Get a bitCount %d, but only 8 ,24 and 32 are supported\n",bitCount);
+		return -1;
+	}
+
+	//测试bmp
 	uchar *image_data = NULL;
-	img = loadBitmapFromFile24(filename, &image_data); //8位图
+	sprintf(filename_buf,"hog_bmp-%s",filename);
+	if(8 == bitCount){
+		img = loadBitmapFromFile8(filename, &image_data); //8位图
+		printf("reverse image\n");
+		uchar *reverse_image = networkData;
+		ImgInverse(img, reverse_image);  //翻转图像
+		img->data = reverse_image;
+		printf("try to save file width : %d  height : %d \n",img->width, img->height);
+		SaveGrayBitmap8(filename_buf, img->data, img->width, img->height);
+	}else if(24 == bitCount){
+		img = loadBitmapFromFile24(filename, &image_data); //24位图
+		printf("reverse image\n");
+		uchar *reverse_image = networkData;
+		ImgInverse(img, reverse_image);  //翻转图像
+		img->data = reverse_image;
+		printf("try to save file width : %d  height : %d \n",img->width, img->height);
+		SaveGrayBitmap24(filename_buf, img->data, img->width, img->height);
+	}else if(32 == bitCount){
+		img = loadBitmapFromFile32(filename, &image_data); //32位图
+		printf("reverse image\n");
+		uchar *reverse_image = networkData;
+		ImgInverse(img, reverse_image);  //翻转图像
+		img->data = reverse_image;
+		printf("try to save file width : %d  height : %d \n",img->width, img->height);
+		SaveGrayBitmap32(filename_buf, img->data, img->width, img->height);
+	}
 
-	uchar *reverse_image = networkData;
-	ImgInverse(img, reverse_image);  //锟斤拷转图锟斤拷
-	img->data = reverse_image;
-	SaveGrayBitmap24("G:\\hog_bmp.bmp", img->data, img->width, img->height);
-
-
-	////锟斤拷锟斤拷pgm
+	////测试pgm
 	//img = readPGM(filename);
-	//SaveGrayBitmap8("E:\\hog_pgm.bmp", img->data, img->width, img->height); //锟斤拷锟斤拷pgm,锟斤拷锟絙mp,锟斤拷锟缴标定锟斤拷锟斤拷
+	//SaveGrayBitmap8("E:\\hog_pgm.bmp", img->data, img->width, img->height); //输入pgm,输出bmp,即可标定坐标
 
-	printf("input bmp name %s:\n", filename);
+	printf("%s:\n", filename);
+	t = clock() - t;
+	printf("\nprepare data Time= %fsecs\n", ((float)t) / CLOCKS_PER_SEC);
 	if (!img->data)
 		return -1;
 	/************************************************************************/
@@ -226,14 +356,22 @@ int main(int argc, char** argv)
 	hogalc(&hog);
 	sizealc(&w, 8, 8);
 	sizealc(&p, 32, 32);
+	
+	printf("size of hog = %d nlevel = %d \n",hog.svmSize,hog.nlevels);
 	t = clock();
 
-	//锟斤拷叨燃锟斤拷
-	//锟斤拷锟斤拷锟斤拷锟酵计琲mg锟斤拷锟叫讹拷叨锟斤拷锟斤拷思锟斤拷
-	//img为锟斤拷锟斤拷锟斤拷锟斤拷锟酵计拷锟絝ound为锟斤拷獾侥匡拷锟斤拷锟斤拷锟斤拷斜锟斤拷锟斤拷锟斤拷锟?为锟斤拷锟斤拷锟节诧拷锟斤拷锟斤拷为锟斤拷锟斤拷目锟斤拷锟斤拷锟街碉拷锟揭诧拷锟斤拷羌锟解到锟斤拷锟斤拷锟斤拷锟斤拷SVM锟斤拷锟洁超平锟斤拷木锟斤拷锟?
-	//锟斤拷锟斤拷4为锟斤拷锟斤拷锟斤拷锟斤拷每锟斤拷锟狡讹拷锟侥撅拷锟诫。锟斤拷锟斤拷锟斤拷锟角匡拷锟狡讹拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷5为图锟斤拷锟斤拷锟斤拷拇锟叫★拷锟斤拷锟斤拷锟?为锟斤拷锟斤拷系锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷图片每锟轿尺达拷锟斤拷锟斤拷锟斤拷锟接的憋拷锟斤拷锟斤拷
-	//锟斤拷锟斤拷7为锟斤拷锟斤拷值锟斤拷锟斤拷校锟斤拷系锟斤拷锟斤拷锟斤拷一锟斤拷目锟疥被锟斤拷锟斤拷锟斤拷诩锟斤拷锟斤拷锟绞憋拷锟斤拷貌锟斤拷锟斤拷锟绞憋拷锟斤拷锟斤拷说锟斤拷锟斤拷锟斤拷茫锟轿?时锟斤拷示锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷谩锟?
+	//多尺度检测
+	//对输入的图片img进行多尺度行人检测
+	//img为输入待检测的图片；
+	//found为检测到目标区域列表；
+	//参数3为程序内部计算为行人目标的阈值，也就是检测到的特征到SVM分类超平面的距离;
+	//参数4为滑动窗口每次移动的距离,它必须是块移动的整数倍；
+	//参数5为图像扩充的大小；
+	//参数6为比例系数，即测试图片每次尺寸缩放增加的比例；
+	//参数7为组阈值，即校正系数，当一个目标被多个窗口检测出来时，该参数此时就起了调节作用，为0时表示不起调节作用。
+
 	detectMultiScale(&hog, img, &found, 0, w, p, 1.05, 2, 0);
+	
 	t = clock() - t;
 	printf("\nDetection Time= %fsecs\n", ((float)t) / CLOCKS_PER_SEC);
 	if (sbcount(found))
@@ -241,30 +379,47 @@ int main(int argc, char** argv)
 		for (i = 0; i < sbcount(found); i++)
 		{
 			printf("%s : x=%d y=%d w=%d h=%d\n", str, found[i].x, found[i].y, found[i].width, found[i].height);
-			
-			DrawImageEdgeCorner24(img, found[i].x, found[i].y, found[i].width, found[i].height);
+			if(8 == bitCount){
+				DrawImageEdgeCorner8(img, found[i].x, found[i].y, found[i].width, found[i].height);
+			}else if(24 == bitCount){
+				DrawImageEdgeCorner24(img, found[i].x, found[i].y, found[i].width, found[i].height);
+			}else if(32 == bitCount){
+				DrawImageEdgeCorner32(img, found[i].x, found[i].y, found[i].width, found[i].height);
+			}
 		}
 	}
 	else
-	{
+	{	
+		printf("Detect failed\n");
 		printf("%s : x=%d y=%d w=%d h=%d\n", str, 0, 0, 0, 0);
 	}
-	printf("try to save result\n");
-	SaveGrayBitmap24("G:\\Detect_result.bmp", img->data, img->width, img->height);
-	printf("save result finished\n");
+	printf("Try to store the result\n");
+	sprintf(filename_buf,"Detect_result-%s",filename);
+	if(8 == bitCount){
+		SaveGrayBitmap8(filename_buf, img->data, img->width, img->height);
+	}else if(24 == bitCount){
+		SaveGrayBitmap24(filename_buf, img->data, img->width, img->height);
+	}else if(32 == bitCount){
+		SaveGrayBitmap32(filename_buf, img->data, img->width, img->height);
+	}
+	
+	printf("before free\n");
 	sbfree(found);
+	printf("after sbfree found\n");
 	sbfree(found_filtered);
-	free(img->data);
-	free(img);
-
+	printf("after sbfree found_filtered\n");
+	// free(img->data);
+	printf("after free img->data\n");
+	// free(img);
+	printf("after free img\n");
 	return 0;
 }
 
 
 
 
-////锟斤拷锟斤拷锟斤拷锟斤拷锟侥硷拷
-//#define  FILEPATH "E:\\CLQ_C_code\\ppm\\FileNameList.txt" //锟斤拷锟斤拷锟侥硷拷路锟斤拷锟斤拷锟侥硷拷锟斤拷锟狡ｏ拷锟斤拷锟缴凤拷式双锟斤拷锟斤拷锟斤拷03_ReadFileNames.bat锟侥硷拷锟斤拷锟斤拷锟皆讹拷锟斤拷锟斤拷
+////批量处理文件
+//#define  FILEPATH "E:\\CLQ_C_code\\ppm\\FileNameList.txt" //批量文件路径下文件名称：生成方式双击里面03_ReadFileNames.bat文件即可自动生成
 //int main(int argc, char** argv)
 //{
 //	myMat *img;
@@ -278,7 +433,7 @@ int main(int argc, char** argv)
 //
 //	FILE* f = 0;
 //	char _filename[1024];
-//	// 锟斤拷取锟斤拷锟斤拷图片锟侥硷拷路锟斤拷
+//	// 获取测试图片文件路径
 //	f = fopen(FILEPATH, "rt");
 //	if (!f)
 //	{
@@ -286,15 +441,16 @@ int main(int argc, char** argv)
 //		return 0;
 //	}
 //	FILE* f_save = NULL;
-//	if (!(f_save=fopen("E:\\CLQ_C_code\\FileNameList.txt", "wt+")))  //锟斤拷锟截憋拷锟斤拷锟斤拷路锟斤拷锟斤拷锟皆硷拷锟借定
+//	if (!(f_save=fopen("E:\\CLQ_C_code\\FileNameList.txt", "wt+")))  //本地保存结果路径，自己设定
 //	{
 //		fprintf(stderr, "ERROR: the specified file could not be loaded\n");
 //		return 0;
 //	}
 //
-//	// 锟斤拷锟酵计?//	for (;;)
+//	// 检测图片
+//	for (;;)
 //	{
-//		// 锟斤拷取锟侥硷拷锟斤拷
+//		// 读取文件名
 //		char* filename = _filename;
 //		if (f)
 //		{
@@ -304,7 +460,7 @@ int main(int argc, char** argv)
 //			if (filename[0] == '#')
 //				continue;
 //
-//			//去锟斤拷锟秸革拷
+//			//去掉空格
 //			int l = (int)strlen(filename);
 //			while (l > 0 && isspace(filename[l - 1]))
 //				--l;
@@ -336,7 +492,7 @@ int main(int argc, char** argv)
 //		else
 //		{
 //			printf("%s : x=%d y=%d w=%d h=%d\n", str, 0, 0, 0, 0);
-//			//fprintf(f_save,"%s %d %d %d\n", str,0, 0,0,0);  //锟斤拷锟侥硷拷
+//			//fprintf(f_save,"%s %d %d %d\n", str,0, 0,0,0);  //存文件
 //		}
 //	} //end for
 //	if(f_save)

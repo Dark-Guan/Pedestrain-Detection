@@ -116,12 +116,12 @@ double gcd(double a, double b)
 	return a;
 };
 
-__inline size_t myalignSize(size_t sz, int n)
+static  __inline size_t myalignSize(size_t sz, int n)
 {
 	return (sz + n-1) & -n;
 };
 
-__inline int clip(int x, int a, int b)
+static  __inline int clip(int x, int a, int b)
 {
     return x >= a ? (x < b ? x : b-1) : a;
 };
@@ -2222,10 +2222,10 @@ void hogalc (hog_ *obj)
        -0.02411991f, -0.04229729f, 0.10666174f, -6.66579151f };
 	   obj->svmSize = sizeof(detector)/sizeof(detector[0]);
 	   obj->svmDetector = detector; 
-	   sizealc(&obj->winSize,64,128);
-	sizealc(&obj->blockSize,16,16);
-	sizealc(&obj->blockStride,8,8);
-	sizealc(&obj->cellSize,8,8);
+	   sizealc(&obj->winSize,64,128); //计算 hog 的单元大小
+	sizealc(&obj->blockSize,16,16); //计算方向梯度统计的单元大小
+	sizealc(&obj->blockStride,8,8); //梯度计算单元，滑移的距离
+	sizealc(&obj->cellSize,8,8);//计算梯度的最小单元
 	obj->nbins = 9;
 	obj->derivAperture = 1;
 	obj->winSigma = -1;

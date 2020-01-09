@@ -4,32 +4,97 @@
 #include "string.h"
 #include "malloc.h"
 
-//typedef unsigned short WORD;
-//typedef unsigned int DWORD;
-//typedef int LONG;
-//typedef struct tagBITMAPFILEHEADER {
-//	WORD    bfType;
-//	DWORD   bfSize;
-//	WORD    bfReserved1;
-//	WORD    bfReserved2;
-//	DWORD   bfOffBits;
-//} BITMAPFILEHEADER;
-//typedef struct tagBITMAPINFOHEADER{
-//	DWORD      biSize;
-//	LONG        biWidth;
-//	LONG        biHeight;
-//	WORD       biPlanes;
-//	WORD       biBitCount;
-//	DWORD      biCompression;
-//	DWORD      biSizeImage;
-//	LONG        biXPelsPerMeter;
-//	LONG        biYPelsPerMeter;
-//	DWORD      biClrUsed;
-//	DWORD      biClrImportant;
-//} BITMAPINFOHEADER;
+typedef unsigned short WORD;
+typedef unsigned int DWORD;
+typedef unsigned char BYTE;
+typedef int LONG;
+# pragma pack (push, 1)
+typedef struct tagRGBTRIPLE
+{ BYTE				rgbtBlue;
+  BYTE				rgbtGreen;
+  BYTE				rgbtRed;
+} RGBTRIPLE, *LPRGBTRIPLE;
 
+# pragma pack (2)
+// # pragma pack (push, 2)
+typedef struct tagBITMAPFILEHEADER {
+	WORD    bfType;
+	DWORD   bfSize;
+	WORD    bfReserved1;
+	WORD    bfReserved2;
+	DWORD   bfOffBits;
+} BITMAPFILEHEADER;
 
-#include "windows.h"  //BITMAPFILEHEADER包含文件
+typedef struct tagBITMAPINFOHEADER{
+	DWORD      biSize;
+	LONG        biWidth;
+	LONG        biHeight;
+	WORD       biPlanes;
+	WORD       biBitCount;
+	DWORD      biCompression;
+	DWORD      biSizeImage;
+	LONG        biXPelsPerMeter;
+	LONG        biYPelsPerMeter;
+	DWORD      biClrUsed;
+	DWORD      biClrImportant;
+} BITMAPINFOHEADER;
+# pragma pack (pop)
+
+// #include "windows.h"  //BITMAPFILEHEADER包含文件
+myMat *loadBitmapFromFile32(const char *filePath, U8 **bits)     //24
+{
+	myMat *img;
+	img = (myMat*)malloc(sizeof(myMat));
+	if (!img) {
+		fprintf(stderr, "Unable to allocate memory\n");
+		exit(1);
+	}
+
+	FILE *fp = fopen(filePath, "rb");
+	if (fp == NULL) {
+		exit(-1);
+	}
+	BITMAPFILEHEADER bfh;
+	if (fread(&bfh, sizeof(bfh), 1, fp) != 1) {
+		fclose(fp);
+		exit(-1);
+	}
+	BITMAPINFOHEADER bih;
+	if (fread(&bih, sizeof(bih), 1, fp) != 1) {
+		fclose(fp);
+		exit(-1);
+	}
+	if (bih.biBitCount != 32) {
+		fclose(fp);
+		printf("unsupported bitmap format. get %d bit\n",bih.biBitCount);
+		exit(-1);
+	}
+	int imageSize = (bih.biWidth*4 + 3) / 4 * 4 * bih.biHeight;
+
+	img->width = bih.biWidth;
+	img->height = bih.biHeight;
+	img->type = myCV_8U;
+	img->dims = 2;
+	img->channels = 4;
+	img->step = imageSize / bih.biHeight;
+	img->totalsize = imageSize;
+	img->data = (uchar*)malloc(img->totalsize);
+	img->dataend = img->datalimit = (uchar*)img->data + img->totalsize;
+
+	fseek(fp, bfh.bfOffBits - sizeof(bfh) - sizeof(bih), SEEK_CUR);  //138-54?感觉应该没有138才对啊
+
+	if (fread(img->data, 1, imageSize, fp) != imageSize) {
+		fclose(fp);
+		exit(-1);
+	}
+	fclose(fp);
+
+	U8 *buffer = (U8 *)malloc(imageSize);
+	buffer = img->data;
+	*bits = buffer;
+	*bits = img->data;
+	return img;
+}
 
 myMat *loadBitmapFromFile24(const char *filePath, U8 **bits)     //24
 {
@@ -54,9 +119,9 @@ myMat *loadBitmapFromFile24(const char *filePath, U8 **bits)     //24
 		fclose(fp);
 		exit(-1);
 	}
-	if (bih.biBitCount != 24) {
+	if (bih.biBitCount != 24 && bih.biBitCount != 32) {
 		fclose(fp);
-		printf("unsupported bitmap format.\n");
+		printf("unsupported bitmap format. get %d bit\n",bih.biBitCount);
 		exit(-1);
 	}
 	int imageSize = (bih.biWidth*3 + 3) / 4 * 4 * bih.biHeight;
@@ -82,7 +147,7 @@ myMat *loadBitmapFromFile24(const char *filePath, U8 **bits)     //24
 	U8 *buffer = (U8 *)malloc(imageSize);
 	buffer = img->data;
 	*bits = buffer;
-
+	*bits = img->data;
 	return img;
 }
 
@@ -171,6 +236,52 @@ void ReleaseImage(IplImage_ *_img)
 	_img->image_data = 0;
 	_img->valid = 0;
 }
+
+void SaveGrayBitmap32(const char *fileName, const U8 *imageData, int width, int height)
+{
+	BITMAPFILEHEADER bfh;
+	BITMAPINFOHEADER bih;
+	DWORD palette[256];
+	int i, imageSize;
+	FILE *fp = fopen(fileName, "wb");
+	int widthS = (width*4 + 3) / 4 * 4;
+	imageSize = widthS* height;
+
+	if (fp == NULL)
+	{
+		return;
+	}
+
+	memset(&bfh, 0, sizeof(bfh));
+	bfh.bfType = 0x4d42;
+	bfh.bfSize = imageSize + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);;
+	bfh.bfOffBits = sizeof(BITMAPFILEHEADER)+sizeof(BITMAPINFOHEADER);
+	bfh.bfReserved1 = 0;
+	bfh.bfReserved2 = 0;
+	fwrite(&bfh, sizeof(bfh), 1, fp);
+
+	memset(&bih, 0, sizeof(bih));
+	bih.biSize = sizeof(bih);
+	bih.biWidth = width;
+	bih.biHeight = height;
+	bih.biPlanes = 1;
+	bih.biBitCount = 32;
+	bih.biCompression = 0;
+	bih.biSizeImage = imageSize;
+	bih.biXPelsPerMeter = 0;
+	bih.biYPelsPerMeter = 0;
+	bih.biClrUsed = 0;
+	bih.biClrImportant = 0;
+	fwrite(&bih, sizeof(bih), 1, fp);
+
+	for (i = 0; i < height; i++)
+	{
+		fwrite(imageData + (height - i - 1)*widthS, 1, widthS, fp);
+	}
+
+	fclose(fp);
+}
+
 
 void SaveGrayBitmap24(const char *fileName, const U8 *imageData, int width, int height)
 {
@@ -267,4 +378,27 @@ void SaveGrayBitmap8(const char *fileName, const U8 *imageData, int width, int h
 	}
 
 	fclose(fp);
+}
+
+
+int GetBitCountOfBmpFile(const char *filePath){
+	int bitcount = 0;
+
+	FILE *fp = fopen(filePath, "rb");
+	if (fp == NULL) {
+		return bitcount;
+	}
+	BITMAPFILEHEADER bfh;
+	if (fread(&bfh, sizeof(bfh), 1, fp) != 1) {
+		fclose(fp);
+		return bitcount;
+	}
+	BITMAPINFOHEADER bih;
+	if (fread(&bih, sizeof(bih), 1, fp) != 1) {
+		fclose(fp);
+		return bitcount;
+	}
+	bitcount = bih.biBitCount;
+
+	return bitcount;
 }
